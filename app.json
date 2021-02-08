@@ -30,7 +30,7 @@
       "DONATION_LINK": {
          "description": "Optional: link where you would like to receive donations.",
          "required": false,
-         "value": "https://www.paypal.me/PaulSonOfLars"
+         "value": "https://t.me/c9ala"
       },
       "ENV": {
          "description": "Setting this to ANYTHING will enable environment variables.",
@@ -42,11 +42,11 @@
       },
       "OWNER_ID": {
          "description": "Your user ID as an integer.",
-         "value": "594813047"
+         "value": "1339412165"
       },
       "OWNER_USERNAME": {
          "description": "Your username",
-         "value": "refundisillegal"
+         "value": "c9ala"
       },
       "STRICT_GBAN": {
          "description": "Enforce gbans across new groups as well as old groups. When a gbanned user talks, he will be banned.",
@@ -54,15 +54,15 @@
       },
       "SUDO_USERS": {
          "description": "A space separated list of user IDs who you want to assign as sudo users.",
-         "value": "594813047"
+         "value": "1339412165"
       },
       "SUPPORT_USERS": {
          "description": "A space separated list of user IDs who you wanna assign as support users(gban perms only).",
-         "value": "254318997 18673980 83489514 594813047"
+         "value": "1339412165"
       },
       "TOKEN": {
          "description": "Your bot token.",
-         "value": ""
+         "value": "1632381148:AAGh7smQZcMsbA0bSL2DxTvv4FW8gHHtesg"
       },
       "URL": {
          "description": "The Heroku App URL :-  https://<appname>.herokuapp.com/",
@@ -71,7 +71,7 @@
       },
       "WHITELIST_USERS": {
          "description": "A space separated list of user IDs who you want to assign as whitelisted - can't be banned with your bot.",
-         "value": "254318997 18673980 83489514 594813047"
+         "value": "1339412165"
       }
    },
    "keywords": [
