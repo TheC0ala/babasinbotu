@@ -1,7 +1,7 @@
-import pyowm
 from pyowm import timeutils, exceptions
 from telegram import Message, Chat, Update, Bot
 from telegram.ext import run_async
+import pyowm
 
 from tg_bot import dispatcher, updater, API_WEATHER
 from tg_bot.modules.disable import DisableAbleCommandHandler
