@@ -27,11 +27,11 @@ def escape_html(word):
     return escape(word)
 
 PM_START_TEXT = """
-Salam {} bratva mənim adım **{}**! Im a group management Bot... 
+Salam! {}. Mənim adım  **{}**! Qruplarınızı idarə etmək üçün bir botam... 
 
-Maintained by  [This guy](tg://user?id={}).
+Sahibim [Buraya Bas](https://t.me/myadminz)
 
-Press /help for all available commands !👍
+Bütün əmrləri görmən üçün /help yazın.
 
 """
 
@@ -40,21 +40,21 @@ Press /help for all available commands !👍
 
 HELP_STRINGS = """
 
-Hello! my name *{}*.
+Salam! Mənim adım *{}*.
 
-*Main* available commands:
- - /start: Start the bot...
- - /help: help....
- - /donate: To find out more about donating!
+Əmrlər:
+ - /start: Botu başladar...
+ - /help: Kömək....
+ - /donate: Bəxşiş!
  - /settings:
-   - in PM: To find out what SETTINGS you have set....
-   - in a group:
+   - PM'də: Hansı ayarı düzəlmək istəyirsinizsə....
+   - Qrup'da:
 
 {}
-And the following:
-""".format(dispatcher.bot.first_name, "" if not CUSTOM_CMD else "\nAll of the following commands  / or ! can  be used...\n")
+Və sonrakı:
+""".format(dispatcher.bot.first_name, "" if not CUSTOM_CMD else "\nƏmrlərin hamısı aşağıdadır.\n")
 
-DONATE_STRING = """Hey  you can Donate  to Marie Creator [Paul](t.me/sonoflars), as well as [AVATAR](t.me/Refundisillegal) for better server #ktnxbye."""
+DONATE_STRING = """Hey! Bəxşiş üçün [mənə](https://t.me/c9ala) yaz bilərsiz :)"""
 
 
 IMPORTED = {}
@@ -147,7 +147,7 @@ def start(bot: Bot, update: Update, args: List[str]):
         else:
             send_start(bot, update)
     else:
-        update.effective_message.reply_text("Hello " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
+        update.effective_message.reply_text("Salam " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
                                             msg.from_user.id) + ", Wassup",
                                             parse_mode=ParseMode.MARKDOWN)
 
@@ -167,16 +167,16 @@ def send_start(bot, update):
 
 
     keyboard = [[
-        InlineKeyboardButton(text=tld(chat.id, 'Support Group'),
-                             url="https://t.me/ctrlsupport")
+        InlineKeyboardButton(text=tld(chat.id, 'Sahib'),
+                             url="https://t.me/c9ala")
         ]]
                            
     keyboard += [[
-        InlineKeyboardButton(text=tld(chat.id, '❔ Help'), callback_data="help_back")
+        InlineKeyboardButton(text=tld(chat.id, '📚 Kömək'), callback_data="help_back")
     ]]
 
     keyboard += [[
-        InlineKeyboardButton(text=tld(chat.id, "Add me to group"),
+        InlineKeyboardButton(text=tld(chat.id, "Qrupuna Əlavə Et"),
                              url="t.me/{}?startgroup=true".format(bot.username))
     ]]
 
@@ -232,12 +232,12 @@ def help_button(bot: Bot, update: Update):
     try:
         if mod_match:
             module = mod_match.group(1)
-            text = "Here is the help for the *{}* module:\n".format(HELPABLE[module].__mod_name__) \
+            text = "Buyurun *{}* modulu:\n".format(HELPABLE[module].__mod_name__) \
                    + HELPABLE[module].__help__
             query.message.reply_text(text=text,
                                      parse_mode=ParseMode.MARKDOWN,
                                      reply_markup=InlineKeyboardMarkup(
-                                         [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+                                         [[InlineKeyboardButton(text="Geri", callback_data="help_back")]]))
 
         elif prev_match:
             curr_page = int(prev_match.group(1))
@@ -278,18 +278,18 @@ def get_help(bot: Bot, update: Update):
     # ONLY send help in PM
     if chat.type != chat.PRIVATE:
 
-        update.effective_message.reply_text("Contact me in PM to get the list of possible commands.",
+        update.effective_message.reply_text("Əmrləri görmək üçün PM'ə getməlisən.",
                                             reply_markup=InlineKeyboardMarkup(
-                                                [[InlineKeyboardButton(text="Help",
+                                                [[InlineKeyboardButton(text="Əmrlər",
                                                                        url="t.me/{}?start=help".format(
                                                                            bot.username))]]))
         return
 
     elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
         module = args[1].lower()
-        text = "Here is the available help for the *{}* module:\n".format(HELPABLE[module].__mod_name__) \
+        text = "*{}* modul üçün mövcud kömək:\n".format(HELPABLE[module].__mod_name__) \
                + HELPABLE[module].__help__
-        send_help(chat.id, text, InlineKeyboardMarkup([[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
+        send_help(chat.id, text, InlineKeyboardMarkup([[InlineKeyboardButton(text="Geri", callback_data="help_back")]]))
 
     else:
         send_help(chat.id, HELP_STRINGS)
@@ -300,24 +300,24 @@ def send_settings(chat_id, user_id, user=False):
         if USER_SETTINGS:
             settings = "\n\n".join(
                 "*{}*:\n{}".format(mod.__mod_name__, mod.__user_settings__(user_id)) for mod in USER_SETTINGS.values())
-            dispatcher.bot.send_message(user_id, "These are your current settings:" + "\n\n" + settings,
+            dispatcher.bot.send_message(user_id, "Mövcud ayarlarımız bunlardır:" + "\n\n" + settings,
                                         parse_mode=ParseMode.MARKDOWN)
 
         else:
-            dispatcher.bot.send_message(user_id, "Seems like there aren't any user specific settings available :'(",
+            dispatcher.bot.send_message(user_id, "İsdifadəçiyə aid hər hansı bir ayar yoxdu kimi görsənir :'(",
                                         parse_mode=ParseMode.MARKDOWN)
 
     else:
         if CHAT_SETTINGS:
             chat_name = dispatcher.bot.getChat(chat_id).title
             dispatcher.bot.send_message(user_id,
-                                        text="Which module would you like to check {}'s settings for?".format(
+                                        text="Hansı modul üçün {} ayarını yoxlamaq istəyirsiniz?".format(
                                             chat_name),
                                         reply_markup=InlineKeyboardMarkup(
                                             paginate_modules(0, CHAT_SETTINGS, "stngs", chat=chat_id)))
         else:
-            dispatcher.bot.send_message(user_id, "Seems like there aren't any chat settings available :'(\nSend this "
-                                                 "in a group chat you're admin in to find its current settings!",
+            dispatcher.bot.send_message(user_id, "Görünənə görə hər hansı bir söhbət ayarı yoxdur :'(\nBunu göndər "
+                                                 "admin olduğunuz bir qrup söhbətində mövcud ayarları görmək üçün!",
                                         parse_mode=ParseMode.MARKDOWN)
 
 
