@@ -19,22 +19,22 @@ def addsudo(bot: Bot, update: Update, args: List[str]):
     user_id = extract_user(message, args)
     
     if not user_id:
-        message.reply_text("Refer a user first....")
+        message.reply_text("Əvvəlcə bir isdifadəçini yönləndirin...")
         return ""
         
     if int(user_id) == OWNER_ID:
-        message.reply_text("The specified user is my owner! No need add him to SUDO_USERS list!")
+        message.reply_text("Əlavə etmək istədiyiniz şəxs onsuzda mənim sahibimdir!")
         return ""
         
     if int(user_id) in SUDO_USERS:
-        message.reply_text("Buddy this user is already a sudo user.")
+        message.reply_text("Dosdum, bu isdiafadəçi onsuzda SUDO siyahısında var.")
         return ""
     
     with open("sudo_users.txt","a") as file:
         file.write(str(user_id) + "\n")
     
     SUDO_USERS.append(user_id)
-    message.reply_text("Succefully Added To SUDO List!")
+    message.reply_text("Uğurla SUDO siyahısına əlavə edildi!")
         
     return ""
 
@@ -45,15 +45,15 @@ def rsudo(bot: Bot, update: Update, args: List[str]):
     user_id = extract_user(message, args)
     
     if not user_id:
-        message.reply_text("Refer the user first.")
+        message.reply_text("Əvvəlcə bir isdifadəçini yönləndirin")
         return ""
 
     if int(user_id) == OWNER_ID:
-        message.reply_text("The specified user is my owner! I won't remove him from SUDO_USERS list!")
+        message.reply_text("Yazdığınız isdifadəçi mənim sahibimdir! Onu SUDO_LIST siyahısındam silməyəcəm!")
         return ""
-    
+
     if user_id not in SUDO_USERS:
-        message.reply_text("{} is not a sudo user".format(user_id))
+        message.reply_text("{} SUDO isdifadəçisi deyil.".format(user_id))
         return ""
 
     users = [line.rstrip('\n') for line in open("sudo_users.txt")]
@@ -64,15 +64,15 @@ def rsudo(bot: Bot, update: Update, args: List[str]):
                 file.write(str(user) + "\n")
 
     SUDO_USERS.remove(user_id)
-    message.reply_text("Yep Succefully removed from SUDO List!")
+    message.reply_text("İsdifadəçi SUDO siyahısından uğurla silindi!")
     
     return ""
 
 
 __help__ = """
-*Bot owner only:*
- - /addsudo: promotes the user to SUDO USER
- - /rsudo: demotes the user from SUDO USER
+*Sadəcə sahib üçün:*
+ - /addsudo: isdifadəçini SUDO siyahısına əlavə edər
+ - /rsudo: isdifadəçini SUDO siayhısından silər
 """
 
 __mod_name__ = "Sudo"
