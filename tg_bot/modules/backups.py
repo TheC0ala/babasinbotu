@@ -39,7 +39,7 @@ def import_data(bot: Bot, update):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text("This is a group only command!")
+            update.effective_message.reply_text("Bu əmr qrup üçündür!")
             return ""
 
         chat = update.effective_chat
@@ -51,7 +51,7 @@ def import_data(bot: Bot, update):
                 msg.reply_to_message.document.file_id)
         except BadRequest:
             msg.reply_text(
-                "Try downloading and uploading the file yourself again, This one seem broken to me!"
+                "Faylı yenidən yüklə! Bu mənə xarab kimi gəldi!"
             )
             return
 
@@ -71,19 +71,19 @@ def import_data(bot: Bot, update):
         try:
             if data.get(str(chat.id)) is None:
                 if conn:
-                    text = "Backup comes from another chat, I can't return another chat to chat *{}*".format(
+                    text = "Yedək başqa bir söhbətdən gəlir, başqa bir sohbeti sohbet üçün geri qaytara bilmirəm *{}*".format(
                         chat_name)
                 else:
-                    text = "Backup comes from another chat, I can't return another chat to this chat"
+                    text = "Yedək başqa bir söhbətdən gəlir, başqa bir sohbəti bu söhbətə qaytara bilmirəm"
                 return msg.reply_text(text, parse_mode="markdown")
         except Exception:
             return msg.reply_text(
-                "There was a problem while importing the data!")
+                "məlumatları idxal edərkən bir problem oldu!")
         # Check if backup is from self
         try:
             if str(bot.id) != str(data[str(chat.id)]["bot"]):
                 return msg.reply_text(
-                    "Backup from another bot that is not suggested might cause the problem, documents, photos, videos, audios, records might not work as it should be."
+                    "Təklif olunmayan başqa bir botdan yedəkləmə problemə səbəb ola bilər, sənədlər, şəkillər, videolar, audiolar, qeydlər lazım olduğu kimi işləməyəcəkdir."
                 )
         except Exception:
             pass
@@ -98,7 +98,7 @@ def import_data(bot: Bot, update):
                 mod.__import_data__(str(chat.id), data)
         except Exception:
             msg.reply_text(
-                "An error occurred while recovering your data. The process failed. If you experience a problem with this, please take it to @ctrlsupport"
+                "Məlumatlarınızı bərpa edərkən bir səhv baş verdi. Proses alınmadı."
             )
 
             LOGGER.exception(
@@ -112,9 +112,9 @@ def import_data(bot: Bot, update):
         # NOTE: consider default permissions stuff?
         if conn:
 
-            text = "Backup fully restored on *{}*.".format(chat_name)
+            text = "Yedəkləmə *{}* tarixində tamamilə bərpa edildi.".format(chat_name)
         else:
-            text = "Backup fully restored"
+            text = "Yedəkləmə tamamilə bərpə edildi"
         msg.reply_text(text, parse_mode="markdown")
 
 @run_async
@@ -134,7 +134,7 @@ def export_data(bot: Bot, update: Update, chat_data):
     else:
         if update.effective_message.chat.type == "private":
             update.effective_message.reply_text(
-                "This command can only be used on group, not PM"
+                "Bu əmr PM'də işləməz! Qrupda yaz!"
             )
             return ""
         chat = update.effective_chat
@@ -150,7 +150,7 @@ def export_data(bot: Bot, update: Update, chat_data):
                 "%H:%M:%S %d/%m/%Y", time.localtime(checkchat.get("value"))
             )
             update.effective_message.reply_text(
-                "You can only backup once a day!\nYou can backup again in about `{}`".format(
+                "Gündə 1 dəfə yedəkləmə edə bilərsiz.\nTəxmini `{}` zaman sonra təkrar cəhd edin".format(
                     timeformatt
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -329,7 +329,7 @@ def export_data(bot: Bot, update: Update, chat_data):
     try:
         bot.sendMessage(
             MESSAGE_DUMP,
-            "*Successfully imported backup:*\nChat: `{}`\nChat ID: `{}`\nOn: `{}`".format(
+            "*Yədəkləmə uğurla içə əlavə edildi:*\nQrup: `{}`\nQrup ID: `{}`\nON: `{}`".format(
                 chat.title, chat_id, tgl
             ),
             parse_mode=ParseMode.MARKDOWN,
@@ -339,14 +339,14 @@ def export_data(bot: Bot, update: Update, chat_data):
     bot.sendDocument(
         current_chat_id,
         document=open("CTRL{}.backup".format(chat_id), "rb"),
-        caption="*Successfully imported backup:*\nChat: `{}`\nChat ID: `{}`\nOn: `{}`\n\nNote: This `CTRL-Backup` is specially made for notes.".format(
+        caption="*Yedəkləmə uğurla içə əlavə edildi:*\nQrup: `{}`\nQrup ID: `{}`\nON: `{}`".format(
             chat.title, chat_id, tgl
         ),
         timeout=360,
         reply_to_message_id=msg.message_id,
         parse_mode=ParseMode.MARKDOWN,
     )
-    os.remove("CTRL{}.backup".format(chat_id))  # Cleaning file
+    os.remove("@C9ALA{}.backup".format(chat_id))  # Cleaning file
 
 
 # Temporary data
@@ -366,11 +366,10 @@ def get_chat(chat_id, chat_data):
 __mod_name__ = "Backups"
 
 __help__ = """
-*Only for chat administrator:*
- - /import: reply to the backup file for the butler / emilia group to import as much as possible, making transfers very easy! \
- Note that files / photos cannot be imported due to telegram restrictions.
- - /export: export group data, which will be exported are: rules, notes (documents, images, music, video, audio, voice, text, text buttons) \
-This module is still in beta!
+*Qrup adminləri üçün:*
+ - /import: köçürmələri çox asanlaşdıraraq / emilia qrupunun mümkün qədər idxal etməsi üçün ehtiyat sənədinə cavab verin
+ - /export: İxrac ediləcək ixracat qrupu məlumatları bunlardır: qaydalar, qeydlər (sənədlər, şəkillər, musiqi, video, səs, səs, mətn, mətn düymələri) \
+Bu modul hələ beta versiyasındadır!
 """
 
 IMPORT_HANDLER = CommandHandler("import", import_data)
