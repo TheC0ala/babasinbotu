@@ -38,26 +38,26 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
     user = update.effective_user
 
     if not chat.get_member(bot.id).can_promote_members:
-        update.effective_message.reply_text("I can't promote/demote people here! "
-                                            "Make sure I'm admin and can appoint new admins.")
+        update.effective_message.reply_text("Burda insanları promote/demote etmirəm! "
+                                            "Admin olduğumdan və yeni adminlər əlavə etmə yetkimin açıq olduğundan əmin olun")
         exit(1)
 
     if user_can_promote(chat, user, bot.id) is False:
-        message.reply_text("You don't have enough rights to promote someone!")
+        message.reply_text("Birini admin etmək üçün yetərli yetkiyə sahib deyilsiz!")
         return ""
 
     user_id = extract_user(message, args)
     if not user_id:
-        message.reply_text("You don't seem to be referring to a user.")
+        message.reply_text("Deyəsən bir isdifadəçini nəzərdə tutmursan.")
         return ""
 
     user_member = chat.get_member(user_id)
     if user_member.status in ["administrator", "creator"]:
-        message.reply_text("This person is already an admin...!")
+        message.reply_text("Bu isdifadəçi onsuzda admindir!")
         return ""
 
     if user_id == bot.id:
-        message.reply_text("I can't promote myself! Get an admin to do it for me.")
+        message.reply_text("Özümü admin edə bilmərəm! Bunun üçün başqa bir admin tap.")
         return ""
 
     # set same perms as bot - bot can't assign higher perms than itself!
@@ -73,7 +73,7 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
                           can_pin_messages=bot_member.can_pin_messages,
                           can_promote_members=bot_member.can_promote_members)
 
-    message.reply_text("Successfully promoted {} in <b>{}</b>!".format(mention_html(user_member.user.id, user_member.user.first_name), (chat.title)), parse_mode=ParseMode.HTML)
+    message.reply_text("{} uğurla <b>{}</b> qrupunda admin edildi!".format(mention_html(user_member.user.id, user_member.user.first_name), (chat.title)), parse_mode=ParseMode.HTML)
     return (
         "<b>{}:</b>"
         "\n#PROMOTED"
@@ -95,15 +95,15 @@ def title(bot: Bot, update: Update, args):
     message = update.effective_message
     
     if user_can_promote(chat, user, bot.id) is False:
-        message.reply_text("You don't have enough rights to do that!")
+        message.reply_text("Bunu etmək üçün yetərli haqqın yoxdur!")
         return ""
     
     user_id, title = extract_user_and_text(message, args)
     if not user_id:
-        message.reply_text("You don't seem to be referring to a user.")
+        message.reply_text("Bir isdifadəçi haqqında yazmırsan deyəsən...")
         return
     if not title:
-        message.reply_text("There's no title...")
+        message.reply_text("Başlıq yoxdur.")
         return
 
     response = requests.post(
@@ -130,32 +130,32 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
     user = update.effective_user
 
     if not chat.get_member(bot.id).can_promote_members:
-        update.effective_message.reply_text("I can't promote/demote people here! "
-                                            "Make sure I'm admin and can appoint new admins.")
+        update.effective_message.reply_text("Burda insanları promote/demote etmirəm! "
+                                            "Admin olduğumdan və yeni adminlər əlavə etmə yetkimin açıq olduğundan əmin olun")
         exit(1)
 
     if user_can_promote(chat, user, bot.id) is False:
-        message.reply_text("You don't have enough rights to demote someone!")
+        message.reply_text("Birini admin etmək üçün yetərli yetkiyə sahib deyilsiz!")
         return ""
 
     user_id = extract_user(message, args)
     if not user_id:
-        message.reply_text("You don't seem to be referring to a user.")
+        message.reply_text("V.")
         return ""
 
     user_member = chat.get_member(user_id)
     if user_member.status == "creator":
-        message.reply_text("I'm not gonna demote Creator this group.... 🙄")
+        message.reply_text("Sahibin yetkisini ala bilmərəm.")
         return ""
 
     if user_member.status != "administrator":
         message.reply_text(
-            "How I'm supposed to demote someone who is not even an admin!"
+            "Admin olmayan birinin yetkisini necə alım?"
         )
         return ""
 
     if user_id == bot.id:
-        message.reply_text("Yeahhh... Not gonna demote myself!")
+        message.reply_text("Öz yetkimi almayacağam!!")
         return ""
 
     try:
@@ -168,7 +168,7 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
                               can_restrict_members=False,
                               can_pin_messages=False,
                               can_promote_members=False)
-        message.reply_text("Successfully demoted {} in <b>{}</b>!".format(mention_html(user_member.user.id, user_member.user.first_name), (chat.title)), parse_mode=ParseMode.HTML)
+        message.reply_text("{} yetkisi uğurla <b>{}</b> qrupunda alındı!".format(mention_html(user_member.user.id, user_member.user.first_name), (chat.title)), parse_mode=ParseMode.HTML)
         return f"<b>{html.escape(chat.title)}:</b>" \
                 "\n#DEMOTED" \
                f"\n<b>Admin:</b> {mention_html(user.id, user.first_name)}" \
@@ -176,8 +176,8 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
 
     except BadRequest:
         message.reply_text(
-            "Failed to demote. I might not be admin, or the admin status was appointed by another "
-            "user, so I can't act upon them!"
+            "Yetki alınmadı. Admin olmaya bilərəm və ya adminlik başqa bir şəxs tərəfindən verilib "
+            "buna görə onda dəyişiklik edilmədi!"
         )
         return ""
 
@@ -199,7 +199,7 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
     prev_message = update.effective_message.reply_to_message
 
     if user_can_pin(chat, user, bot.id) is False:
-        message.reply_text("You are missing rights to pin a message!")
+        message.reply_text("Mesaj sabitləmə yetkiniz yoxdur :(")
         return ""
 
     is_silent = True
@@ -216,7 +216,7 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
                 raise
         return (
             "<b>{}:</b>"
-            "\n#PINNED"
+            "\n#SABITLENDI"
             "\n<b>Admin:</b> {}".format(
                 html.escape(chat.title), mention_html(user.id, user.first_name)
             )
@@ -236,7 +236,7 @@ def unpin(bot: Bot, update: Update) -> str:
     if user_can_pin(chat, user, bot.id) is False:
         message = update.effective_message
 
-        message.reply_text("You are missing rights to unpin a message!")
+        message.reply_text("Bir mesajı sabitdən çıxarmaq üçün yetkiniz yoxdur!")
         return ""
 
     try:
@@ -247,7 +247,7 @@ def unpin(bot: Bot, update: Update) -> str:
 
     return (
         "<b>{}:</b>"
-        "\n#UNPINNED"
+        "\n#SABITLENMEDI"
         "\n<b>Admin:</b> {}".format(
             html.escape(chat.title), mention_html(user.id, user.first_name)
         )
@@ -266,7 +266,7 @@ def invite(bot: Bot, update: Update):
         chat = dispatcher.bot.getChat(conn)
     else:
         if msg.chat.type == "private":
-            msg.reply_text("This command is meant to use in chat not in PM")
+            msg.reply_text("Bu əmr PM'də isdifadə edilə bilməz!")
             return ""
         chat = update.effective_chat
 
@@ -276,18 +276,18 @@ def invite(bot: Bot, update: Update):
         bot_member = chat.get_member(bot.id)
         if bot_member.can_invite_users:
             invitelink = bot.exportChatInviteLink(chat.id)
-            link = "Invite-link generated for *{}:*\n`{}`".format(chat.title, invitelink)
+            link = "Bağlantı yaradıldı *{}:*\n`{}`".format(chat.title, invitelink)
             msg.reply_text(link, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         else:
-            msg.reply_text("I don't have access to the invite link, try changing my permissions!")
+            msg.reply_text("Bağlantı ilə dəvət etmə yetkim yoxdur!")
     else:
-        msg.reply_text("I can only give you invite links for supergroups and channels, sorry!")
+        msg.reply_text("Sizə sadəcə SuperGroup'lar üçün link verə bilərəm...")
 
 @run_async
 def adminlist(bot: Bot, update: Update):
     administrators = update.effective_chat.get_administrators()
     msg = update.effective_message
-    text = "Admins in *{}*:".format(update.effective_chat.title or "this chat")
+    text = "*{}* qrupundakı adminlər:".format(update.effective_chat.title or "this chat")
     for admin in administrators:
         user = admin.user
         status = admin.status
@@ -295,8 +295,8 @@ def adminlist(bot: Bot, update: Update):
         if user.username:
             name = name = escape_markdown("@" + user.username)
         if status == "creator":
-            text += "\n 🔱 Creator:"
-            text += "\n` • `{} \n\n • *Administrators*:".format(name)
+            text += "\n 👑 Sahib:"
+            text += "\n` • `{} \n\n • *Adminlər*:".format(name)
     for admin in administrators:
         user = admin.user
         status = admin.status
@@ -308,27 +308,27 @@ def adminlist(bot: Bot, update: Update):
             
         if status == "administrator":
             text += "\n`👮🏻 `{}".format(name)
-            members = "\n\n*Members:*\n`🧒 ` {} users".format(count)
+            members = "\n\n*Qrup Sayı:*\n`✨ ` {} users".format(count)
             
     msg.reply_text(text + members, parse_mode=ParseMode.MARKDOWN)
 
 
 
 def __chat_settings__(chat_id, user_id):
-    return "You are *admin*: `{}`".format(
+    return "Sən *adminsən*: `{}`".format(
         dispatcher.bot.get_chat_member(chat_id, user_id).status in ("administrator", "creator"))
 
 
 __help__ = """
- - /adminlist: list of admins in the chat
+ - /adminlist: qrupdakı adminləri göstərər
 
-*Admin only:*
- - /pin: silently pins the message replied to - add `loud` or `notify` or `violent` to give notifs to users.
- - /unpin: unpins the currently pinned message
- - /invitelink: gets invitelink
- - /promote: promotes the user replied to
- - /title <title>: as a reply to a user, sets admin title.
- - /demote: demotes the user replied to
+*Adminlər üçün:*
+ - /pin: mesajı sabitləyər *səssizcə* sabitləyər - səsli sabitləmək üçün `loud` və ya `notify` əlavə edin
+ - /unpin: sabitdəki mesajı sabitdən çıxarar
+ - /invitelink: qrupun dəvət linkini verər
+ - /promote: cavab verilən isdifadəçini admin edər
+ - /title <başlıq>: adminin başlığını dəyişər
+ - /demote: cavab verilən isdifadəçinin admin yetkisini alar
 """
 
 __mod_name__ = "Admin"
