@@ -11,8 +11,8 @@ class Config(object):
 
     # REQUIRED
     API_KEY = ""
-    OWNER_ID = "594813047" # If you dont know, run @MissRose_bot and do /id in pm
-    OWNER_USERNAME = "refundisillegal"
+    OWNER_ID = "1339412165" # If you dont know, run @MissRose_bot and do /id in pm
+    OWNER_USERNAME = "c9ala"
 
     #Telethon [for purge stuff] Login to https://my.telegram.org and get these credentials
     API_ID = None
