@@ -30,7 +30,7 @@ def afk(bot: Bot, update: Update):
     reason = args[1] if len(args) >= 2 else ""
     sql.set_afk(update.effective_user.id, reason)
     fname = update.effective_user.first_name
-    update.effective_message.reply_text(f"{fname} is now AFK!")
+    update.effective_message.reply_text(f"{fname} artıə AFK'dır!")
 
 
 @run_async
@@ -44,7 +44,7 @@ def no_longer_afk(bot: Bot, update: Update):
     if res:
         firstname = update.effective_user.first_name
         try:
-            update.effective_message.reply_text(f"{firstname} is no longer AFK!")
+            update.effective_message.reply_text(f"{firstname} artıq AFK deyil!")
         except:
             return
 
@@ -86,16 +86,16 @@ def check_afk(bot, update, user_id, fst_name):
     if sql.is_afk(user_id):
         user = sql.check_afk_status(user_id)
         if not user.reason:
-            res = "{} is AFK!".format(fst_name)
+            res = "{} AFK'dır!".format(fst_name)
         else:
-            res = "{} is AFK!.\nReason: <code>{}</code>".format(html.escape(fst_name), html.escape(user.reason))
+            res = "{} AFK'dır!.\nSəbəb: <code>{}</code>".format(html.escape(fst_name), html.escape(user.reason))
         update.effective_message.reply_text(res, parse_mode=ParseMode.HTML)
 
 
 def __user_info__(user_id):
     is_afk = sql.is_afk(user_id)
 
-    text = "<b>Currently AFK</b>: {}"
+    text = "<b>Hazırda AFK</b>: {}"
     if is_afk:
         return text.format("Yes")
 
@@ -107,9 +107,8 @@ def __gdpr__(user_id):
     sql.rm_afk(user_id)
 
 __help__ = """
- - /afk <reason>: mark yourself as AFK.
- - brb <reason>: same as the afk command - but not a command.
-When marked as AFK, any mentions will be replied to with a message to say that you're not available!
+ - /afk <səbəb>: sizi AFK edər
+ - brb <səbəb>: afk əmri ilə eynidir. Siz AFK olarkən kimsə sizi tağ etsə və ya mesajınıza cavab versə bot avtomatik cavab verəcək!
 """
 
 __mod_name__ = "AFK"
