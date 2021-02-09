@@ -17,31 +17,31 @@ from tg_bot.modules.log_channel import loggable
 from tg_bot.modules.helper_funcs.filters import CustomFilters
 
 RBAN_ERRORS = {
-    "User is an administrator of the chat",
-    "Chat not found",
-    "Not enough rights to restrict/unrestrict chat member",
+    "İsdifadəçi söhbət adminidir",
+    "Qrup tapılmadı",
+    "Söhbət üzvünü məhdudlaşdırmaq / məhdudlaşdırmaq üçün kifayət qədər hüquq yoxdur",
     "User_not_participant",
     "Peer_id_invalid",
-    "Group chat was deactivated",
-    "Need to be inviter of a user to kick it from a basic group",
+    "Qrup söhbəti deaktiv edildi",
+    "Əsas bir qrupdan salmaq üçün bir istifadəçiyə dəvətçi olmaq lazımdır",
     "Chat_admin_required",
-    "Only the creator of a basic group can kick group administrators",
+    "Sadəcə sahib adminləri qrupdan ata bilər",
     "Channel_private",
-    "Not in the chat"
+    "Qrupda deyil"
 }
 
 RUNBAN_ERRORS = {
-    "User is an administrator of the chat",
-    "Chat not found",
-    "Not enough rights to restrict/unrestrict chat member",
+    "İsdifadəçi söhbət adminidir",
+    "Qrup tapılmadı",
+    "Söhbət üzvünü məhdudlaşdırmaq / məhdudlaşdırmaq üçün kifayət qədər hüquq yoxdur",
     "User_not_participant",
     "Peer_id_invalid",
-    "Group chat was deactivated",
-    "Need to be inviter of a user to kick it from a basic group",
+    "Qrup deaktiv edildi",
+    "Əsas bir qrupdan salmaq üçün bir istifadəçiyə dəvətçi olmaq lazımdır",
     "Chat_admin_required",
-    "Only the creator of a basic group can kick group administrators",
+    "Sadəcə sahib adminləri qrupdan ata bilər",
     "Channel_private",
-    "Not in the chat"
+    "Qrupda deyil"
 }
 
 
