@@ -1,6 +1,6 @@
 
 {
-  "name": "Miss Rose",
+  "name": "control bende",
   "logo": "https://telegra.ph/file/48522f7be29b993a19e60.jpg",
   "description": "Telegram's sassiest group manager. Modular Telegram group management bot!",
   "keywords": [
@@ -10,7 +10,7 @@
     "manager",
     "3"
   ],
-  "repository": "hhttps://github.com/FayasKKD/Miss-Rose-Bot",
+  "repository": "hhttps://github.com/thec0ala/babasinbotu",
   "env": {
     "ENV": {
       "description": "Setting this to ANYTHING will enable env variables",
@@ -22,11 +22,11 @@
     },
     "OWNER_ID": {
       "description": "An integer of consisting of your owner ID",
-      "value": ""
+      "value": "1339412165"
     },
     "OWNER_USERNAME": {
       "description": "Your username",
-      "value": ""
+      "value": "c9ala"
     },
     "WEBHOOK": {
       "description": "Setting this to ANYTHING will enable webhooks when in env mode messages",
@@ -42,19 +42,19 @@
     },
     "SUDO_USERS": {
       "description": "A space separated list of user_ids which should be considered sudo users",
-      "value": ""
+      "value": "1339412165"
     },
     "SUPPORT_USERS": {
       "description": "A space separated list of user_ids which should be considered support users (can gban/ungban, nothing else)",
-      "value": ""
+      "value": "1339412165"
     },
     "WHITELIST_USERS": {
       "description": "A space separated list of user_ids which should be considered whitelisted - they can't be banned.",
-      "value": ""
+      "value": "1339412165"
     },
     "DONATION_LINK": {
       "description": "Optional: link where you would like to receive donations.",
-      "value": ""
+      "value": "https://t.me/c9ala"
     },
     "PORT": {
       "description": "Port to use for your webhooks",
