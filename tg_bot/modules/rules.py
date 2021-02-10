@@ -2,7 +2,7 @@ from typing import Optional
 
 from telegram import Message, Update, Bot, User
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.error import Unauthorized, BadRequest
+from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown
 
@@ -21,14 +21,13 @@ def get_rules(bot: Bot, update: Update):
 # Do not async - not from a handler
 def send_rules(update, chat_id, from_pm=False):
     bot = dispatcher.bot
-    user = update.effective_user 
- # type: Optional[User]
+    user = update.effective_user  # type: Optional[User]
     try:
         chat = bot.get_chat(chat_id)
     except BadRequest as excp:
         if excp.message == "Chat not found" and from_pm:
             bot.send_message(user.id, "The rules shortcut for this chat hasn't been set properly! Ask admins to "
-                                       "fix this.")
+                                      "fix this.")
             return
         else:
             raise
@@ -41,21 +40,14 @@ def send_rules(update, chat_id, from_pm=False):
     elif from_pm:
         bot.send_message(user.id, "The group admins haven't set any rules for this chat yet. "
                                   "This probably doesn't mean it's lawless though...!")
-    elif rules: 
-         if chat.type == "private":
-             update.effective_message.reply_text(rules, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-         else:   
-             try:
-                 bot.send_message(user.id, rules, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-                 update.effective_message.reply_text("I've PM'ed you this group rule's!")
-             except Unauthorized:
-                 update.effective_message.reply_text("Contact me in PM to get this group's rules!",
+    elif rules:
+        update.effective_message.reply_text("Contact me in PM to get this group's rules.",
                                             reply_markup=InlineKeyboardMarkup(
                                                 [[InlineKeyboardButton(text="Rules",
                                                                        url="t.me/{}?start={}".format(bot.username,
-                                                                                                     chat_id))]]))                                                                                                   
+                                                                                                     chat_id))]]))
     else:
-         update.effective_message.reply_text("The group admins haven't set any rules for this chat yet. "
+        update.effective_message.reply_text("The group admins haven't set any rules for this chat yet. "
                                             "This probably doesn't mean it's lawless though...!")
 
 
@@ -100,8 +92,10 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     return "This chat has had it's rules set: `{}`".format(bool(sql.get_rules(chat_id)))
 
+
 __help__ = """
- - /rules: get the rules for specific chat.
+ - /rules: get the rules for this chat.
+
 *Admin only:*
  - /setrules <your rules here>: set the rules for this chat.
  - /clearrules: clear the rules for this chat.

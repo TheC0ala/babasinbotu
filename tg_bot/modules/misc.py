@@ -1,31 +1,20 @@
 import html
-import locale
 import json
-import requests
-import random, re
+import random
 from datetime import datetime
 from typing import Optional, List
-from tg_bot.modules.translations.strings import tld
-from io import BytesIO
-from requests import get
-from random import randint
-from telegram import Message, Chat, Update, Bot, MessageEntity, ParseMode
-from tg_bot.modules.helper_funcs.alternate import send_message
 
-
-from telegram.error import BadRequest
-from telegram import ParseMode, ReplyKeyboardRemove, ReplyKeyboardMarkup
+import requests
+from telegram import Message, Chat, Update, Bot, MessageEntity
+from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html
 
-from tg_bot import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, MAPS_API
-
-from tg_bot.__main__ import STATS, USER_INFO, TOKEN
+from tg_bot import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER
+from tg_bot.__main__ import STATS, USER_INFO
 from tg_bot.modules.disable import DisableAbleCommandHandler
 from tg_bot.modules.helper_funcs.extraction import extract_user
 from tg_bot.modules.helper_funcs.filters import CustomFilters
-
-
 
 RUN_STRINGS = (
     "Where do you think you're going?",
@@ -229,7 +218,6 @@ def get_id(bot: Bot, update: Update, args: List[str]):
 def info(bot: Bot, update: Update, args: List[str]):
     msg = update.effective_message  # type: Optional[Message]
     user_id = extract_user(update.effective_message, args)
-    chat = update.effective_chat
 
     if user_id:
         user = bot.get_chat(user_id)
@@ -237,29 +225,18 @@ def info(bot: Bot, update: Update, args: List[str]):
     elif not msg.reply_to_message and not args:
         user = msg.from_user
 
-    elif (
-        not msg.reply_to_message
-        and len(args) >= 1
-        and not args[0].startswith("@")
-        and not args[0].isdigit()
-        and not msg.parse_entities([MessageEntity.TEXT_MENTION])
-    ):
+    elif not msg.reply_to_message and (not args or (
+            len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
+        [MessageEntity.TEXT_MENTION]))):
         msg.reply_text("I can't extract a user from this.")
         return
 
     else:
         return
 
-    del_msg = msg.reply_text(
-        "Collecting Data from <b>Database</b>...",
-        parse_mode=ParseMode.HTML,
-    )
-
-    text = (
-        "<b>USER INFO</b>:"
-        "\n\nID: <code>{}</code>"
-        "\nFirst Name: {}".format(user.id, html.escape(user.first_name))
-    )
+    text = "<b>User info</b>:" \
+           "\nID: <code>{}</code>" \
+           "\nFirst Name: {}".format(user.id, html.escape(user.first_name))
 
     if user.last_name:
         text += "\nLast Name: {}".format(html.escape(user.last_name))
@@ -269,93 +246,70 @@ def info(bot: Bot, update: Update, args: List[str]):
 
     text += "\nPermanent user link: {}".format(mention_html(user.id, "link"))
 
-    text += "\nNumber of profile pics: {}".format(
-        bot.get_user_profile_photos(user.id).total_count
-    )
-
     if user.id == OWNER_ID:
-        text += "\n\nThis person is my owner.\nI would never do anything against him!"
+        text += "\n\nThis person is my owner - I would never do anything against them!"
+    else:
+        if user.id in SUDO_USERS:
+            text += "\nThis person is one of my sudo users! " \
+                    "Nearly as powerful as my owner - so watch it."
+        else:
+            if user.id in SUPPORT_USERS:
+                text += "\nThis person is one of my support users! " \
+                        "Not quite a sudo user, but can still gban you off the map."
 
-    elif user.id in SUDO_USERS:
-        text += (
-            "\n\nThis person is one of my sudo users! "
-            "Nearly as powerful as my owner - so watch it."
-        )
-
-    elif user.id in SUPPORT_USERS:
-        text += (
-            "\n\nThis person is one of my support users! "
-            "Not quite a sudo user, but can still gban you off the map."
-        )
-
-    elif user.id in WHITELIST_USERS:
-        text += (
-            "\n\nThis person has been whitelisted! "
-            "That means I'm not allowed to ban/kick them."
-        )
-
-    try:
-        user_member = chat.get_member(user.id)
-        if user_member.status == "administrator":
-            result = requests.post(
-                f"https://api.telegram.org/bot{TOKEN}/getChatMember?chat_id={chat.id}&user_id={user.id}"
-            )
-            result = result.json()["result"]
-            if "custom_title" in result.keys():
-                custom_title = result["custom_title"]
-                text += f"\n\nThis user holds the title <b>{custom_title}</b> here."
-    except BadRequest:
-        pass
+            if user.id in WHITELIST_USERS:
+                text += "\nThis person has been whitelisted! " \
+                        "That means I'm not allowed to ban/kick them."
 
     for mod in USER_INFO:
-        try:
-            mod_info = mod.__user_info__(user.id).strip()
-        except TypeError:
-            mod_info = mod.__user_info__(user.id, chat.id).strip()
+        mod_info = mod.__user_info__(user.id).strip()
         if mod_info:
             text += "\n\n" + mod_info
 
-    try:
-        profile = bot.get_user_profile_photos(user.id).photos[0][-1]
-        bot.sendChatAction(chat.id, "upload_photo")
-        bot.send_photo(
-            chat.id,
-            photo=profile,
-            caption=(text),
-            parse_mode=ParseMode.HTML,
-            disable_web_page_preview=True,
-        )
-    except IndexError:
-        bot.sendChatAction(chat.id, "typing")
-        msg.reply_text(text, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
-    finally:
-        del_msg.delete()
+    update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 
 
 @run_async
 def get_time(bot: Bot, update: Update, args: List[str]):
-        location = " ".join(args)
-        if location.lower() == bot.first_name.lower():
-            send_message(update.effective_message, "Its always banhammer time for me!")
-            bot.send_sticker(update.effective_chat.id, BAN_STICKER)
-            return
+    location = " ".join(args)
+    if location.lower() == bot.first_name.lower():
+        update.effective_message.reply_text("Its always banhammer time for me!")
+        bot.send_sticker(update.effective_chat.id, BAN_STICKER)
+        return
 
-        res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
+    res = requests.get(GMAPS_LOC, params=dict(address=location))
 
-        if res.status_code == 200:
-            loc = res.json()
-            if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
-                send_message(update.effective_message, tl(update.effective_message, "Location not Found!"))
-                return
-            placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
-            localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
-            time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S %A, %d %B")
-            send_message(update.effective_message, tld(update.effective_message, "It now `{}` in `{}`").format(time, placename), parse_mode="markdown")
-        else:
-            send_message(update.effective_message, tld(update.effective_message, "Use `/time name place`\nEx: `/time Kolkata`"), parse_mode="markdown")
+    if res.status_code == 200:
+        loc = json.loads(res.text)
+        if loc.get('status') == 'OK':
+            lat = loc['results'][0]['geometry']['location']['lat']
+            long = loc['results'][0]['geometry']['location']['lng']
 
-           
-            
+            country = None
+            city = None
+
+            address_parts = loc['results'][0]['address_components']
+            for part in address_parts:
+                if 'country' in part['types']:
+                    country = part.get('long_name')
+                if 'administrative_area_level_1' in part['types'] and not city:
+                    city = part.get('long_name')
+                if 'locality' in part['types']:
+                    city = part.get('long_name')
+
+            if city and country:
+                location = "{}, {}".format(city, country)
+            elif country:
+                location = country
+
+            timenow = int(datetime.utcnow().timestamp())
+            res = requests.get(GMAPS_TIME, params=dict(location="{},{}".format(lat, long), timestamp=timenow))
+            if res.status_code == 200:
+                offset = json.loads(res.text)['dstOffset']
+                timestamp = json.loads(res.text)['rawOffset']
+                time_there = datetime.fromtimestamp(timenow + timestamp + offset).strftime("%H:%M:%S on %A %d %B")
+                update.message.reply_text("It's {} in {}".format(time_there, location))
+
 
 @run_async
 def echo(bot: Bot, update: Update):
@@ -382,6 +336,7 @@ def gdpr(bot: Bot, update: Update):
                                         "\"for the performance of a task carried out in the public interest\", as is "
                                         "the case for the aforementioned pieces of data.",
                                         parse_mode=ParseMode.MARKDOWN)
+
 
 MARKDOWN_HELP = """
 Markdown is a very powerful formatting tool supported by telegram. {} has some enhancements, to make sure that \
@@ -416,25 +371,6 @@ def markdown_help(bot: Bot, update: Update):
                                         "[URL](example.com) [button](buttonurl:github.com) "
                                         "[button2](buttonurl://google.com:same)")
 
-@run_async
-def reply_keyboard_remove(bot: Bot, update: Update):
-    reply_keyboard = [[ReplyKeyboardRemove(
-            remove_keyboard=True
-        )]]
-    reply_markup = ReplyKeyboardRemove(
-        remove_keyboard=True
-    )
-    old_message = bot.send_message(
-        chat_id=update.message.chat_id,
-        text='Hmmm, Trying...',
-        reply_markup=reply_markup,
-        reply_to_message_id=update.message.message_id
-    )
-    bot.delete_message(
-        chat_id=update.message.chat_id,
-        message_id=old_message.message_id
-    )
-
 
 @run_async
 def stats(bot: Bot, update: Update):
@@ -457,8 +393,8 @@ def stickerid(bot: Bot, update: Update):
 def getsticker(bot: Bot, update: Update):
     msg = update.effective_message
     chat_id = update.effective_chat.id
-    bot.sendChatAction(chat_id, "typing")
     if msg.reply_to_message and msg.reply_to_message.sticker:
+        bot.sendChatAction(chat_id, "typing")
         update.effective_message.reply_text("Hello " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
                                             msg.from_user.id) + ", Please check the file you requested below."
                                             "\nPlease use this feature wisely!",
@@ -470,8 +406,9 @@ def getsticker(bot: Bot, update: Update):
         bot.sendDocument(chat_id, document=open('sticker.png', 'rb'))
         bot.sendChatAction(chat_id, "upload_photo")
         bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
-
+        
     else:
+        bot.sendChatAction(chat_id, "typing")
         update.effective_message.reply_text("Hello " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
                                             msg.from_user.id) + ", Please reply to sticker message to get sticker image",
                                             parse_mode=ParseMode.MARKDOWN)
@@ -484,13 +421,12 @@ __help__ = """
  - /time <place>: gives the local time at the given place.
  - /info: get information about a user.
  - /gdpr: deletes your information from the bot's database. Private chats only.
- - /markdownhelp: quick summary of how markdown works in telegram - ge only be called in private chats.
- - /removebotkeyboard: Got a nasty bot keyboard stuck in your group try this!
+ - /markdownhelp: quick summary of how markdown works in telegram - can only be called in private chats.
+ - /stickerid: reply to a sticker and get sticker id of that.
+ - /getsticker: reply to a sticker and get that sticker as .png and image. 
 """
 
-
-
-__mod_name__ = "Misc"
+__mod_name__ = "Miscs"
 
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, pass_args=True)
 IP_HANDLER = CommandHandler("ip", get_bot_ip, filters=Filters.chat(OWNER_ID))
@@ -523,4 +459,3 @@ dispatcher.add_handler(STATS_HANDLER)
 dispatcher.add_handler(GDPR_HANDLER)
 dispatcher.add_handler(STICKERID_HANDLER)
 dispatcher.add_handler(GETSTICKER_HANDLER)
-dispatcher.add_handler(DisableAbleCommandHandler("removebotkeyboard", reply_keyboard_remove))

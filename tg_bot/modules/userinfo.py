@@ -7,7 +7,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import tg_bot.modules.sql.userinfo_sql as sql
-from tg_bot import dispatcher, SUDO_USERS, OWNER_ID
+from tg_bot import dispatcher, SUDO_USERS
 from tg_bot.modules.disable import DisableAbleCommandHandler
 from tg_bot.modules.helper_funcs.extraction import extract_user
 
@@ -17,13 +17,16 @@ def about_me(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
     user_id = extract_user(message, args)
 
-    user = bot.get_chat(user_id) if user_id else message.from_user
+    if user_id:
+        user = bot.get_chat(user_id)
+    else:
+        user = message.from_user
+
     info = sql.get_user_me_info(user.id)
 
     if info:
         update.effective_message.reply_text("*{}*:\n{}".format(user.first_name, escape_markdown(info)),
-                                            parse_mode=ParseMode.MARKDOWN,
-                                            disable_web_page_preview=True)
+                                            parse_mode=ParseMode.MARKDOWN)
     elif message.reply_to_message:
         username = message.reply_to_message.from_user.first_name
         update.effective_message.reply_text(username + "Information about him is currently unavailable !")
@@ -35,9 +38,6 @@ def about_me(bot: Bot, update: Update, args: List[str]):
 def set_about_me(bot: Bot, update: Update):
     message = update.effective_message  # type: Optional[Message]
     user_id = message.from_user.id
-    if user_id in (777000, 1087968824):
-        message.reply_text("Don't set info for Telegram bots!")
-        return
     text = message.text
     info = text.split(None, 1)  # use python's maxsplit to only remove the cmd, hence keeping newlines.
     if len(info) == 2:
@@ -54,18 +54,21 @@ def about_bio(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
 
     user_id = extract_user(message, args)
-    user = bot.get_chat(user_id) if user_id else message.from_user
+    if user_id:
+        user = bot.get_chat(user_id)
+    else:
+        user = message.from_user
+
     info = sql.get_user_bio(user.id)
 
     if info:
         update.effective_message.reply_text("*{}*:\n{}".format(user.first_name, escape_markdown(info)),
-                                            parse_mode=ParseMode.MARKDOWN,
-                                            disable_web_page_preview=True)
+                                            parse_mode=ParseMode.MARKDOWN)
     elif message.reply_to_message:
         username = user.first_name
         update.effective_message.reply_text("{} No details about him have been added yet !".format(username))
     else:
-        update.effective_message.reply_text("You haven't had a bio set about yourself yet!")
+        update.effective_message.reply_text(" Your information about you has been added !")
 
 
 @run_async
@@ -75,17 +78,11 @@ def set_about_bio(bot: Bot, update: Update):
     if message.reply_to_message:
         repl_message = message.reply_to_message
         user_id = repl_message.from_user.id
-        if user_id in (777000, 1087968824):
-            message.reply_text("Don't set bio for Telegram bots!")
-            return
         if user_id == message.from_user.id:
             message.reply_text("Are you looking to change your own ... ?? That 's it.")
             return
         elif user_id == bot.id and sender.id not in SUDO_USERS:
-            message.reply_text(" Only BOT Sudos can change my information.")
-            return
-        elif user_id == OWNER_ID:
-            message.reply_text("You ain't setting my master bio LMAO😂.")
+            message.reply_text(" Only SUDO USERS can change my information.")
             return
 
         text = message.text
@@ -93,13 +90,13 @@ def set_about_bio(bot: Bot, update: Update):
         if len(bio) == 2:
             if len(bio[1]) < MAX_MESSAGE_LENGTH // 4:
                 sql.set_user_bio(user_id, bio[1])
-                message.reply_text("Updated's {} Bio !".format(repl_message.from_user.first_name))
+                message.reply_text("{} Information about the him has been successfully collected !".format(repl_message.from_user.first_name))
             else:
                 message.reply_text(
                     "About you {} Must stick to the letter! The number of characters you have just tried {} hm .".format(
                         MAX_MESSAGE_LENGTH // 4, len(bio[1])))
     else:
-        message.reply_text(" Reply to someone's message to set their bio! ")
+        message.reply_text(" His information can only be added if someone's MESSAGE as a REPLY")
 
 
 def __user_info__(user_id):
@@ -122,7 +119,7 @@ __help__ = """
  - /me: will get your or another user's info
 """
 
-__mod_name__ = "Bios and Abouts"
+__mod_name__ = "Bio/About"
 
 SET_BIO_HANDLER = DisableAbleCommandHandler("setbio", set_about_bio)
 GET_BIO_HANDLER = DisableAbleCommandHandler("bio", about_bio, pass_args=True)

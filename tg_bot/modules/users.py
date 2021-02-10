@@ -4,14 +4,11 @@ from typing import Optional
 
 from telegram import TelegramError, Chat, Message
 from telegram import Update, Bot
-from telegram.error import BadRequest, Unauthorized
+from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, CommandHandler
 from telegram.ext.dispatcher import run_async
 
-
 import tg_bot.modules.sql.users_sql as sql
-from tg_bot import SUDO_USERS
-from tg_bot import escape_markdown
 from tg_bot import dispatcher, OWNER_ID, LOGGER
 from tg_bot.modules.helper_funcs.filters import CustomFilters
 
@@ -42,7 +39,9 @@ def get_user_id(username):
                     return userdat.id
 
             except BadRequest as excp:
-                if excp.message != 'Chat not found':
+                if excp.message == 'Chat not found':
+                    pass
+                else:
                     LOGGER.exception("Error extracting user ID")
 
     return None
@@ -99,31 +98,8 @@ def chats(bot: Bot, update: Update):
         update.effective_message.reply_document(document=output, filename="chatlist.txt",
                                                 caption="Here is the list of chats in my database.")
 
-  
-
-@run_async
-def rem_chat(bot: Bot, update: Update):
-    msg = update.effective_message
-    chats = sql.get_all_chats()
-    kicked_chats = 0
-    for chat in chats:
-        id = chat.chat_id
-        sleep(0.1) # Reduce floodwait
-        try:
-            bot.get_chat(id, timeout=60)
-        except (BadRequest, Unauthorized):
-            kicked_chats += 1
-            sql.rem_chat(id)
-    if kicked_chats >= 1:
-        msg.reply_text("Done! {} chats were removed from the database!".format(kicked_chats))
-    else:
-        msg.reply_text("No chats had to be removed from the database!")
-
-        
 
 def __user_info__(user_id):
-    if user_id in [777000, 1087968824]:
-        return """╘══「 Groups count: <code>???</code> 」"""
     if user_id == dispatcher.bot.id:
         return """I've seen them in... Wow. Are they stalking me? They're in all the same places I am... oh. It's me."""
     num_chats = sql.get_user_num_chats(user_id)
@@ -145,11 +121,7 @@ __mod_name__ = "Users"
 BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
 CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
-DELETE_CHATS_HANDLER = CommandHandler("cleanchats", rem_chat, filters=Filters.user(OWNER_ID))
-
-
 
 dispatcher.add_handler(USER_HANDLER, USERS_GROUP)
 dispatcher.add_handler(BROADCAST_HANDLER)
 dispatcher.add_handler(CHATLIST_HANDLER)
-dispatcher.add_handler(DELETE_CHATS_HANDLER)

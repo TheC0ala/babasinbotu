@@ -65,6 +65,8 @@ tg.CommandHandler = CustomCommandHandler
 # NOT ASYNC
 def restr_members(bot, chat_id, members, messages=False, media=False, other=False, previews=False):
     for mem in members:
+        if mem.user in SUDO_USERS:
+            pass
         try:
             bot.restrict_chat_member(chat_id, mem.user,
                                      can_send_messages=messages,
@@ -91,6 +93,7 @@ def unrestr_members(bot, chat_id, members, messages=True, media=True, other=True
 @run_async
 def locktypes(bot: Bot, update: Update):
     update.effective_message.reply_text("\n - ".join(["Locks: "] + list(LOCK_TYPES) + list(RESTRICTION_TYPES)))
+
 
 @user_admin
 @bot_can_delete
@@ -209,7 +212,9 @@ def del_lockables(bot: Bot, update: Update):
                 try:
                     message.delete()
                 except BadRequest as excp:
-                    if excp.message != "Message to delete not found":
+                    if excp.message == "Message to delete not found":
+                        pass
+                    else:
                         LOGGER.exception("ERROR in lockables")
 
             break
@@ -225,7 +230,9 @@ def rest_handler(bot: Bot, update: Update):
             try:
                 msg.delete()
             except BadRequest as excp:
-                if excp.message != "Message to delete not found":
+                if excp.message == "Message to delete not found":
+                    pass
+                else:
                     LOGGER.exception("ERROR in restrictions")
             break
 
@@ -233,33 +240,33 @@ def rest_handler(bot: Bot, update: Update):
 def build_lock_message(chat_id):
     locks = sql.get_locks(chat_id)
     restr = sql.get_restr(chat_id)
-    if (locks or restr):
-        res = "These are the locks in this chat:"
-    else:
+    if not (locks or restr):
         res = "There are no current locks in this chat."
-    if locks:
-        res += "\n - sticker = `{}`" \
-               "\n - audio = `{}`" \
-               "\n - voice = `{}`" \
-               "\n - document = `{}`" \
-               "\n - video = `{}`" \
-               "\n - contact = `{}`" \
-               "\n - photo = `{}`" \
-               "\n - gif = `{}`" \
-               "\n - url = `{}`" \
-               "\n - bots = `{}`" \
-               "\n - forward = `{}`" \
-               "\n - game = `{}`" \
-               "\n - location = `{}`".format(locks.sticker, locks.audio, locks.voice, locks.document,
-                                             locks.video, locks.contact, locks.photo, locks.gif, locks.url,
-                                             locks.bots, locks.forward, locks.game, locks.location)
-    if restr:
-        res += "\n - messages = `{}`" \
-               "\n - media = `{}`" \
-               "\n - other = `{}`" \
-               "\n - previews = `{}`" \
-               "\n - all = `{}`".format(restr.messages, restr.media, restr.other, restr.preview,
-                                        all([restr.messages, restr.media, restr.other, restr.preview]))
+    else:
+        res = "These are the locks in this chat:"
+        if locks:
+            res += "\n - sticker = `{}`" \
+                   "\n - audio = `{}`" \
+                   "\n - voice = `{}`" \
+                   "\n - document = `{}`" \
+                   "\n - video = `{}`" \
+                   "\n - contact = `{}`" \
+                   "\n - photo = `{}`" \
+                   "\n - gif = `{}`" \
+                   "\n - url = `{}`" \
+                   "\n - bots = `{}`" \
+                   "\n - forward = `{}`" \
+                   "\n - game = `{}`" \
+                   "\n - location = `{}`".format(locks.sticker, locks.audio, locks.voice, locks.document,
+                                                 locks.video, locks.contact, locks.photo, locks.gif, locks.url,
+                                                 locks.bots, locks.forward, locks.game, locks.location)
+        if restr:
+            res += "\n - messages = `{}`" \
+                   "\n - media = `{}`" \
+                   "\n - other = `{}`" \
+                   "\n - previews = `{}`" \
+                   "\n - all = `{}`".format(restr.messages, restr.media, restr.other, restr.preview,
+                                            all([restr.messages, restr.media, restr.other, restr.preview]))
     return res
 
 
@@ -271,15 +278,6 @@ def list_locks(bot: Bot, update: Update):
     res = build_lock_message(chat.id)
 
     update.effective_message.reply_text(res, parse_mode=ParseMode.MARKDOWN)
-
-def __import_data__(chat_id, data):
-    # set chat locks
-    locks = data.get("locks", {})
-    for itemlock in locks:
-        if itemlock in LOCK_TYPES:
-            sql.update_lock(chat_id, itemlock, locked=True)
-        elif itemlock in RESTRICTION_TYPES:
-            sql.update_restriction(chat_id, itemlock, locked=True)
 
 
 def __migrate__(old_chat_id, new_chat_id):
