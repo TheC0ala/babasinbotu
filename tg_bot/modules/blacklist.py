@@ -38,7 +38,7 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
         chat_id = update.effective_chat.id
         chat_name = chat.title
 
-    filter_list = "Current blacklisted words in <b>{}</b>:\n".format(chat_name)
+    filter_list = "Hal hazırda qara siyahıda olan sözlər <b>{}</b>:\n".format(chat_name)
 
     all_blacklisted = sql.get_chat_blacklist(chat_id)
 
@@ -54,10 +54,10 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
 
     split_text = split_message(filter_list)
     for text in split_text:
-        if filter_list == "Current blacklisted words in <b>{}</b>:\n".format(chat_name):
+        if filter_list == "Hal hazırda qara siyahıda olan sözlər <b>{}</b>:\n".format(chat_name):
             send_message(
                 update.effective_message,
-                "No blacklisted words in <b>{}</b>!".format(chat_name),
+                "Qara siyahıya alınmış söz yoxdur<b>{}</b>!".format(chat_name),
                 parse_mode=ParseMode.HTML,
             )
             return
@@ -99,7 +99,7 @@ def add_blacklist(bot: Bot, update: Update):
         if len(to_blacklist) == 1:
             send_message(
                 update.effective_message,
-                "Added blacklist <code>{}</code> in chat: <b>{}</b>!".format(
+                "<code>{}</code> <b>{}</b> qrupunda qara siyahıya alındı!".format(
                     html.escape(to_blacklist[0]), chat_name
                 ),
                 parse_mode=ParseMode.HTML,
@@ -108,7 +108,7 @@ def add_blacklist(bot: Bot, update: Update):
         else:
             send_message(
                 update.effective_message,
-                "Added blacklist trigger: <code>{}</code> in <b>{}</b>!".format(
+                "Qara siyahı tetikləyici əlavə edildi: <code>{}</code> in <b>{}</b>!".format(
                     len(to_blacklist), chat_name
                 ),
                 parse_mode=ParseMode.HTML,
@@ -117,7 +117,7 @@ def add_blacklist(bot: Bot, update: Update):
     else:
         send_message(
             update.effective_message,
-            "Tell me which words you would like to add in blacklist.",
+            "Qara siyahıya əlavə etməyim üçün bir söz yaz.",
         )
 
 
